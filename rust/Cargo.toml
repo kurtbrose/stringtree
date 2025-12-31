@@ -1,0 +1,14 @@
+[package]
+name = "stringtree_rs"
+version = "0.1.0"
+edition = "2021"
+description = "Fast Rust implementation of the Indented String Tree (IST) parser"
+authors = ["Stringtree Maintainers"]
+license = "MIT"
+
+[dependencies]
+indexmap = "2.2"
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+thiserror = "1.0"

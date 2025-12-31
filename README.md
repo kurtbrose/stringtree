@@ -59,7 +59,8 @@ comparisons.
 
 ## Project direction
 
-This repository will provide a clean Python interface backed by a fast Rust
-implementation. Future work will add parsing, serialization, and validation
-implemented in Rust with Python bindings, along with unit tests that assert
-conformance to the IST specification.
+This repository provides a clean Python interface backed by a fast Rust
+implementation. The reference Python parser lives in ``src/stringtree`` and a
+Rust implementation is available under ``rust/`` for performance-sensitive use
+cases. Future work will connect the Rust backend to Python bindings and add
+additional conformance tests.
