@@ -64,3 +64,12 @@ implementation. The reference Python parser lives in ``src/stringtree`` and a
 Rust implementation is available under ``rust/`` for performance-sensitive use
 cases. Future work will connect the Rust backend to Python bindings and add
 additional conformance tests.
+
+## Development
+
+- **Python**: The test suite uses ``pytest`` with ``src`` on the import path.
+  Install the optional ``dev`` dependencies declared in ``pyproject.toml`` and
+  run ``pytest`` from the repository root.
+- **Rust**: Run ``cargo fmt -- --check``, ``cargo clippy -- -D warnings``, and
+  ``cargo test --all --all-features`` from the ``rust/`` directory. The Rust
+  CI workflow installs the stable toolchain with the required components.

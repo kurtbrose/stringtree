@@ -84,13 +84,7 @@ pub fn parse(source: &str) -> Result<IstValue, ParseError> {
         });
     };
 
-    let (parsed, consumed) = parse_container(
-        &processed,
-        start,
-        0,
-        &container_type,
-        &regex,
-    )?;
+    let (parsed, consumed) = parse_container(&processed, start, 0, &container_type, &regex)?;
 
     next_index = next_significant(&processed, consumed);
     if let Some(idx) = next_index {
@@ -138,7 +132,8 @@ fn parse_container(
                     });
                 }
 
-                let (key, value, consumed) = parse_object_entry(lines, index, indent_level, key_regex)?;
+                let (key, value, consumed) =
+                    parse_object_entry(lines, index, indent_level, key_regex)?;
                 if container.contains_key(&key) {
                     return Err(ParseError {
                         line: *lineno,
@@ -193,13 +188,11 @@ fn parse_object_entry(
 ) -> Result<(String, IstValue, usize), ParseError> {
     let (lineno, raw) = &lines[index];
     let stripped = &raw[indent_level * 2..];
-    let (key_segment, value_segment) = stripped
-        .split_once(':')
-        .ok_or_else(|| ParseError {
-            line: *lineno,
-            column: 1,
-            message: "object entries must contain a ':' separator".to_string(),
-        })?;
+    let (key_segment, value_segment) = stripped.split_once(':').ok_or_else(|| ParseError {
+        line: *lineno,
+        column: 1,
+        message: "object entries must contain a ':' separator".to_string(),
+    })?;
 
     if !key_regex.is_match(key_segment) {
         return Err(ParseError {
@@ -212,13 +205,21 @@ fn parse_object_entry(
     if value_segment.is_empty() {
         let next_sig = next_significant(lines, index + 1);
         if next_sig.is_none() {
-            return Ok((key_segment.to_string(), IstValue::String(String::new()), lines.len()));
+            return Ok((
+                key_segment.to_string(),
+                IstValue::String(String::new()),
+                lines.len(),
+            ));
         }
         let next_idx = next_sig.unwrap();
         let (next_lineno, next_raw) = &lines[next_idx];
         let next_indent = leading_indent(next_raw, *next_lineno)?;
         if next_indent == indent_level {
-            return Ok((key_segment.to_string(), IstValue::String(String::new()), next_idx));
+            return Ok((
+                key_segment.to_string(),
+                IstValue::String(String::new()),
+                next_idx,
+            ));
         }
         if next_indent != indent_level + 1 {
             return Err(ParseError {
@@ -239,7 +240,8 @@ fn parse_object_entry(
                 message: "block must start with an object or array entry".to_string(),
             });
         };
-        let (nested, consumed) = parse_container(lines, next_idx, indent_level + 1, &nested_type, key_regex)?;
+        let (nested, consumed) =
+            parse_container(lines, next_idx, indent_level + 1, &nested_type, key_regex)?;
         return Ok((key_segment.to_string(), nested, consumed));
     }
 
@@ -304,7 +306,8 @@ fn parse_array_entry(
                 message: "block must start with an object or array entry".to_string(),
             });
         };
-        let (nested, consumed) = parse_container(lines, next_idx, indent_level + 1, &nested_type, key_regex)?;
+        let (nested, consumed) =
+            parse_container(lines, next_idx, indent_level + 1, &nested_type, key_regex)?;
         return Ok((nested, consumed));
     }
 
@@ -402,7 +405,7 @@ mod tests {
 
     #[test]
     fn parses_nested_structures() {
-        let source = """
+        let source = r#"
         title: Demo
         items:
           - first
@@ -410,7 +413,7 @@ mod tests {
         metadata:
           author:
             name: Ada
-        """
+        "#
         .trim();
 
         let parsed = parse(source).expect("parses");
@@ -425,11 +428,11 @@ mod tests {
 
     #[test]
     fn rejects_bad_indentation() {
-        let source = """
+        let source = r#"
         root:
           - child: value
             subchild: nope
-        """
+        "#
         .trim();
 
         let err = parse(source).expect_err("should fail");
@@ -440,12 +443,12 @@ mod tests {
 
     #[test]
     fn canonical_json_preserves_ordering() {
-        let source = """
+        let source = r#"
         name: Example
         data:
           - alpha
           - beta
-        """
+        "#
         .trim();
 
         let parsed = parse(source).expect("parses");
